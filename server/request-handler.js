@@ -6,15 +6,15 @@
  * *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html. */
 var url = require("url");
 var query = require("querystring");
-var messages = {results: []};
+var messages = {results: [{username: 'test', createdAt: new Date(), text: 'test', roomname: 'Lobby', objectId: 1}]};
 exports.handler = function(request, response) {
 
   var statusCode;
   var headers = defaultCorsHeaders;
   headers['Content-Type'] = "text/plain";
   var urlParts = url.parse(request.url);
-  var queryStr = query.parse(urlParts.query);
-  console.log(queryStr);
+  var queryObj = query.parse(urlParts.query);
+  console.log(queryObj);
 if (!(urlParts.pathname === '/classes/messages' || urlParts.pathname === '/classes/room1')){
     statusCode = 404;
     response.writeHead(statusCode,headers);
@@ -53,7 +53,9 @@ var handlePost = function(request, response){
     request.on("end", function(){
       jsonData = JSON.parse(data);
       jsonData.createdAt = new Date();
-      jsonData.ObjectId = messages.results.length
+      jsonData.ObjectId = messages.results.length +1;
+      console.log(jsonData);
+
       messages.results.push(jsonData);
       response.writeHead(statusCode, headers);
       console.log("Serving request type " + request.method + " for url " + request.url);
@@ -61,11 +63,22 @@ var handlePost = function(request, response){
     });
 };
 var handleGet = function(request, response){
+  var urlParts = url.parse(request.url);
+  var queryObj = query.parse(urlParts.query);
   var statusCode = 200;
   var headers = defaultCorsHeaders;
   response.writeHead(statusCode,headers);
   console.log("Serving request type " + request.method + " for url " + request.url);
+  console.log(queryObj['order']);
+  if (queryObj['order']){
+    var sorted = messages.results.sort(function(a,b){
+      return b.createdAt - a.createdAt;
+    });
+    console.log(sorted);
+    response.end(JSON.stringify({results: sorted}));
+  }else{
   response.end(JSON.stringify(messages));
+  }
 };
 /* These headers will allow Cross-Origin Resource Sharing (CORS).
  * This CRUCIAL code allows this server to talk to websites that
