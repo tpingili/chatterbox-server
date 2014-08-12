@@ -4,28 +4,35 @@
  * You'll have to figure out a way to export this function from
  * this file and include it in basic-server.js so that it actually works.
  * *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html. */
+var url = require("url");
+var query = require("querystring");
 var messages = {results: []};
-exports.handleRequest = function(request, response) {
+exports.handler = function(request, response) {
+
   var statusCode;
   var headers = defaultCorsHeaders;
   headers['Content-Type'] = "text/plain";
-  if (request.url !== '/classes/messages'){
+  var urlParts = url.parse(request.url);
+  var queryStr = query.parse(urlParts.query);
+  console.log(queryStr);
+if (!(urlParts.pathname === '/classes/messages' || urlParts.pathname === '/classes/room1')){
     statusCode = 404;
     response.writeHead(statusCode,headers);
     response.end();
     return;
-  }
-  /* the 'request' argument comes from nodes http module. It includes info about the
-  request - such as what URL the browser is requesting. */
+  }else{
+    /* the 'request' argument comes from nodes http module. It includes info about the
+    request - such as what URL the browser is requesting. */
 
-  /* Documentation for both request and response can be found at
-   * http://nodemanual.org/0.8.14/nodejs_ref_guide/http.html */
-  if(request.method === "GET"){
-    return handleGet(request,response);
-  }else if(request.method === "POST"){
-    return handlePost(request, response);
-  }else if(request.method === "OPTIONS"){
-    return handleOptions(request, response);
+    /* Documentation for both request and response can be found at
+     * http://nodemanual.org/0.8.14/nodejs_ref_guide/http.html */
+    if(request.method === "GET"){
+      return handleGet(request,response);
+    }else if(request.method === "POST"){
+      return handlePost(request, response);
+    }else if(request.method === "OPTIONS"){
+      return handleOptions(request, response);
+    }
   }
 };
 var handleOptions = function(request, response){
@@ -45,6 +52,8 @@ var handlePost = function(request, response){
     });
     request.on("end", function(){
       jsonData = JSON.parse(data);
+      jsonData.createdAt = new Date();
+      jsonData.ObjectId = messages.results.length
       messages.results.push(jsonData);
       response.writeHead(statusCode, headers);
       console.log("Serving request type " + request.method + " for url " + request.url);
@@ -66,6 +75,6 @@ var handleGet = function(request, response){
 var defaultCorsHeaders = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "access-control-allow-headers": "content-type, accept, type",
+  "access-control-allow-headers": "content-type, accept, type, data",
   "access-control-max-age": 10 // Seconds.
 };
