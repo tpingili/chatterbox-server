@@ -64,19 +64,19 @@ $(function() {
 
 
           // Don't bother if we have nothing to work with
-          // if (!data.results || !data.results.length) { return; }
+         if (!data.results || !data.results.length) { return; }
 
           // Get the last message
-          // var mostRecentMessage = data.results[data.results.length-1];
-          // var displayedRoom = $('.chat span').first().data('roomname');
+          //var mostRecentMessage = data.results[data.results.length-1];
+          var displayedRoom = $('.chat span').first().data('roomname');
           app.stopSpinner();
           // Only bother updating the DOM if we have a new message
           // if (mostRecentMessage.objectId !== app.lastMessageId || app.roomname !== displayedRoom) {
             // Update the UI with the fetched rooms
-            app.populateRooms(data.results);
+          app.populateRooms(data.results);
 
             // Update the UI with the fetched messages
-            app.populateMessages(data.results, animate);
+          app.populateMessages(data.results, animate);
 
             // Store the ID of the most recent message
             // app.lastMessageId = mostRecentMessage.objectId;
@@ -111,10 +111,9 @@ $(function() {
       }
     },
     populateRooms: function(results) {
-      app.$roomSelect.html('<option value="__newRoom">New room...</option><option value="" selected>Lobby</option></select>');
+      app.$roomSelect.html('<option value="__newRoom">New room...</option>');
 
       if (results) {
-
         var rooms = {};
         results.forEach(function(data) {
           var roomname = data.roomname;
